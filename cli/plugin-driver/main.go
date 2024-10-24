@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -32,7 +33,7 @@ func main() {
 	for _, ctr := range containers {
 		if strings.Contains(ctr.Image, "radicron") {
 			targetID = ctr.ID
-			//fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
+			fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
 			break
 		}
 	}
@@ -60,15 +61,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	re, err := regexp.Compile("file saved.*$")
 	if err != nil {
 		log.Fatal(err)
 	}
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
 	result := []string{}
+	re, err := regexp.Compile("^.*file saved.*$")
 	for scanner.Scan() {
-		result = append(result, re.FindString(scanner.Text()))
+		s := re.FindString(scanner.Text())
+		result = append(result, s)
+		fmt.Println(s)
 	}
 	_ = result
 }
