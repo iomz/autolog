@@ -35,7 +35,7 @@ func LogRadicron(filename string) {
 	for _, ctr := range containers {
 		if strings.Contains(ctr.Image, "radicron") {
 			targetID = ctr.ID
-			fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
+			//fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
 			break
 		}
 	}
@@ -63,8 +63,8 @@ func LogRadicron(filename string) {
 		log.Fatal(err)
 	}
 
-	reFile := regexp.MustCompile("[0-9]{12}_[A-Z]{3,}_.*$")
 	reSave := regexp.MustCompile("file saved")
+	reFile := regexp.MustCompile("[0-9]{12}_[-A-Z]{3,}_.*$")
 
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
@@ -73,6 +73,11 @@ func LogRadicron(filename string) {
 		text := scanner.Text()
 		if reSave.FindString(text) != "" {
 			ss := strings.Split(strings.TrimSuffix(reFile.FindString(text), ".aac"), "_")
+			if len(ss) != 3 {
+				fmt.Printf("parse error: %s", text)
+				fmt.Println(len(ss), ss)
+				os.Exit(1)
+			}
 			ts, _ := time.Parse("200601021504", ss[0])
 			station := ss[1]
 			program := ss[2]
