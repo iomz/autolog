@@ -59,6 +59,11 @@ func main() {
 	log.Printf("Location: %s\n", autolog.Location)
 
 	directory := "/Users/iomz/ghq/github.com/iomz/logs"
+
+	// radicron
+	radicronFile := filepath.Join(directory, "radicron.log")
+	autolog.LogRadicron(radicronFile)
+
 	r, err := git.PlainOpen(directory)
 	CheckIfError(err)
 
@@ -74,7 +79,7 @@ func main() {
 
 	fmt.Println(status)
 
-	Info("git commit -m \"example go-git commit\"")
+	Info("git commit -m")
 	now := time.Now().In(autolog.Location)
 	commit, err := w.Commit(
 		fmt.Sprintf("%s %s", now.Format("2006-01-02"), "radicron"),

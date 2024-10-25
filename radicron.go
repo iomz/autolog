@@ -1,11 +1,14 @@
-package main
+package autolog
 
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
+	"maps"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -13,7 +16,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func main() {
+func LogRadicron(filename string) {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
@@ -50,8 +53,8 @@ func main() {
 		container.LogsOptions{ShowStderr: true,
 			ShowStdout: true,
 			Since:      yesterday.Format("2006-01-02T") + "00:00:00",
-			//Until:      today.Format("2006-01-02T") + "00:00:00",
-			Until:      today.AddDate(0, 0, 1).Format("2006-01-02T") + "00:00:00",
+			Until:      today.Format("2006-01-02T") + "00:00:00",
+			//Until:      today.AddDate(0, 0, 1).Format("2006-01-02T") + "00:00:00",
 			Timestamps: false,
 			Follow:     false,
 		},
@@ -60,15 +63,34 @@ func main() {
 		log.Fatal(err)
 	}
 
-	re, err := regexp.Compile("file saved.*$")
-	if err != nil {
-		log.Fatal(err)
-	}
+	reFile := regexp.MustCompile("[0-9]{12}_[A-Z]{3,}_.*$")
+	reSave := regexp.MustCompile("file saved")
+
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
-	result := []string{}
+	m := make(map[string]string)
 	for scanner.Scan() {
-		result = append(result, re.FindString(scanner.Text()))
+		text := scanner.Text()
+		if reSave.FindString(text) != "" {
+			ss := strings.Split(strings.TrimSuffix(reFile.FindString(text), ".aac"), "_")
+			ts, _ := time.Parse("200601021504", ss[0])
+			station := ss[1]
+			program := ss[2]
+			m[ts.Format("2006-01-02T 15:04 ")+station] = program
+			// fmt.Println(scanner.Text())
+		}
 	}
-	_ = result
+
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	for _, k := range slices.Sorted(maps.Keys(m)) {
+		if _, err = f.WriteString(fmt.Sprintf("%s %s\n", k, m[k])); err != nil {
+			panic(err)
+		}
+	}
 }
