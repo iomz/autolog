@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	conf := flag.String("config", "autolog.toml", "The autolog.[toml|yml] defining the config.")
+	conf := flag.String("config", "autolog.yml", "The autolog.[toml|yml] defining the config.")
 	version := flag.Bool("version", false, "Print version.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [options]\n", os.Args[0])
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// load config
-	if *conf != "autolog.toml" {
+	if *conf != "autolog.yml" {
 		configPath, err := filepath.Abs(*conf)
 		if err != nil {
 			panic(err)
