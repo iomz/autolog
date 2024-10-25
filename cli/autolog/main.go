@@ -14,8 +14,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/iomz/autolog"
 	"github.com/spf13/viper"
-
-	. "github.com/go-git/go-git/v5/_examples"
 )
 
 func main() {
@@ -58,30 +56,36 @@ func main() {
 
 	log.Printf("Location: %s\n", autolog.Location)
 
-	directory := "/Users/iomz/ghq/github.com/iomz/logs"
+	directory := viper.GetString("directory")
 
 	// radicron
 	radicronFile := filepath.Join(directory, "radicron.log")
 	autolog.LogRadicron(radicronFile)
 
+	// Git
 	r, err := git.PlainOpen(directory)
-	CheckIfError(err)
-
+	if err != nil {
+		panic(err)
+	}
 	w, err := r.Worktree()
-	CheckIfError(err)
-
+	if err != nil {
+		panic(err)
+	}
 	_, err = w.Add(".")
-	CheckIfError(err)
+	if err != nil {
+		panic(err)
+	}
 
-	Info("git status --porcelain")
-	status, err := w.Status()
-	CheckIfError(err)
+	/*
+		Info("git status --porcelain")
+		status, err := w.Status()
+		CheckIfError(err)
+		fmt.Println(status)
+	*/
 
-	fmt.Println(status)
-
-	Info("git commit -m")
+	// git commit
 	now := time.Now().In(autolog.Location)
-	commit, err := w.Commit(
+	_, err = w.Commit(
 		fmt.Sprintf("%s %s", now.Format("2006-01-02"), "radicron"),
 		&git.CommitOptions{
 			Author: &object.Signature{
@@ -91,18 +95,23 @@ func main() {
 			},
 		},
 	)
+	if err != nil {
+		panic(err)
+	}
 
-	CheckIfError(err)
+	/*
+			// Prints the current HEAD to verify that all worked well.
+			Info("git show -s")
+			obj, err := r.CommitObject(commit)
+		    if err != nil {
+		        panic(err)
+		    }
+			fmt.Println(obj)
+	*/
 
-	// Prints the current HEAD to verify that all worked well.
-	Info("git show -s")
-	obj, err := r.CommitObject(commit)
-	CheckIfError(err)
-
-	fmt.Println(obj)
-
-	Info("git push")
 	// push using default options
 	err = r.Push(&git.PushOptions{})
-	CheckIfError(err)
+	if err != nil {
+		panic(err)
+	}
 }
