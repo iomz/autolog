@@ -41,7 +41,7 @@ func LogRadicron(filename string) {
 	}
 	if targetID == "" {
 		// no container was found
-		os.Exit(0)
+		return
 	}
 
 	today := time.Now()

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -12,12 +13,45 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/gochore/uniq"
 	"github.com/iomz/autolog"
 	"github.com/spf13/viper"
 )
 
+// uniqSort dedup the lines in `filename`
+func uniqSort(filename string) {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scanner := bufio.NewScanner(file)
+	lines := []string{}
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	file.Close()
+
+	file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	for _, l := range lines[:uniq.Strings(lines)] {
+		if _, err = file.WriteString(fmt.Sprintf("%s\n", l)); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func main() {
 	conf := flag.String("config", "autolog.yml", "The autolog.[toml|yml] defining the config.")
+	dryrun := flag.Bool("dryrun", false, "Do not take any git actions.")
 	version := flag.Bool("version", false, "Print version.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [options]\n", os.Args[0])
@@ -61,6 +95,12 @@ func main() {
 	// radicron
 	radicronFile := filepath.Join(directory, "radicron.log")
 	autolog.LogRadicron(radicronFile)
+	uniqSort(radicronFile)
+
+	// check dryrun
+	if *dryrun {
+		os.Exit(0)
+	}
 
 	// Git
 	r, err := git.PlainOpen(directory)
