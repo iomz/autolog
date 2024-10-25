@@ -35,7 +35,7 @@ func LogRadicron(filename string) {
 	for _, ctr := range containers {
 		if strings.Contains(ctr.Image, "radicron") {
 			targetID = ctr.ID
-			//fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
+			fmt.Printf("[%s]%s %s (status: %s)\n", ctr.ID, ctr.Names, ctr.Image, ctr.Status)
 			break
 		}
 	}
