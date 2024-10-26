@@ -64,7 +64,7 @@ func LogRadicron(filename string) {
 	}
 
 	reSave := regexp.MustCompile("file saved")
-	reFile := regexp.MustCompile("[0-9]{12}_[-A-Z]{3,}_.*$")
+	reFile := regexp.MustCompile("[0-9]{12}_[-A-Z0-9]{3,}_.*$")
 
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
