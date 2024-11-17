@@ -97,6 +97,10 @@ func main() {
 	autolog.LogRadicron(radicronFile)
 	uniqSort(radicronFile)
 
+	// incremental dates
+	datesFile := filepath.Join(directory, "dates.txt")
+	autolog.LogDates(datesFile)
+
 	// check dryrun
 	if *dryrun {
 		os.Exit(0)
