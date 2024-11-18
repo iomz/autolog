@@ -130,7 +130,7 @@ func main() {
 	// git commit
 	now := time.Now().In(autolog.Location)
 	_, err = w.Commit(
-		fmt.Sprintf("%s %s", now.Format("2006-01-02"), "radicron"),
+		fmt.Sprintf("%s autolog", now.Format("2006-01-02")),
 		&git.CommitOptions{
 			Author: &object.Signature{
 				Name:  "Iori Mizutani",
