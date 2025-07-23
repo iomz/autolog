@@ -93,9 +93,11 @@ func main() {
 	directory := viper.GetString("directory")
 
 	// radicron
+	/*
 	radicronFile := filepath.Join(directory, "radicron.log")
 	autolog.LogRadicron(radicronFile)
 	uniqSort(radicronFile)
+	*/
 
 	// incremental dates
 	datesFile := filepath.Join(directory, "dates.txt")
